@@ -1,0 +1,39 @@
+version: '3.8'
+services:
+  frontend:
+    build: ./frontend/
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - crud
+
+  backend:
+    build: ./backend/
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+    networks:
+      - crud
+
+  db:
+    image: mongo:latest
+    command: mongod --quiet --logpath /dev/null
+    ports:
+      - "27017:27017"
+    volumes:
+      - db-data:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root  # Set up a root username
+      - MONGO_INITDB_ROOT_PASSWORD=example  # Set up a root password
+      - MONGO_INITDB_DATABASE=crud  # Set the name of the database to create
+    networks:
+      - crud
+
+volumes:
+  db-data:
+
+networks:
+  crud:
