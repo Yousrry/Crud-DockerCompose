@@ -19,7 +19,7 @@ pipeline {
 	                        docker stop $(docker ps -q) || echo "No active containers to stop."
 
 	                    '''	
-		          sh "docker-compose up --build"
+		          sh "docker-compose up -d --build "
                     
                 }
             }
