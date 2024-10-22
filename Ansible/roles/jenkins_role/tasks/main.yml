@@ -1,0 +1,43 @@
+---
+# Install Jenkins prerequisites
+- name: Ensure OpenJDK 17 and required packages are installed
+  shell: |
+    apt-get update 
+    apt-get upgrade -y
+    apt-get install -y openjdk-17-jdk apt-transport-https ca-certificates gnupg
+
+# Download the new Jenkins GPG key and save it to keyring
+- name: Add Jenkins GPG key
+  shell: |
+    curl -fsSL https://pkg.jenkins.io/debian/jenkins.io-2023.key | tee /usr/share/keyrings/jenkins-keyring.asc > /dev/null
+
+# Add the Jenkins repository to the sources list
+- name: Add Jenkins repository
+  shell: |
+    echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian binary/" | tee /etc/apt/sources.list.d/jenkins.list > /dev/null
+
+# Update apt cache after adding the repository
+- name: Update apt cache
+  shell: apt-get update
+
+# Install Jenkins
+- name: Install Jenkins
+  shell: apt-get install -y jenkins
+
+# Start Jenkins service
+- name: Start and enable Jenkins
+  shell: systemctl enable --now jenkins
+
+- name: Wait for Jenkins to initialize
+  wait_for:
+    path: /var/lib/jenkins/secrets/initialAdminPassword
+    timeout: 60
+
+# Get Jenkins initial admin password
+- name: Get Jenkins initial admin password
+  shell: cat /var/lib/jenkins/secrets/initialAdminPassword
+  register: jenkins_admin_password
+
+# Debug the retrieved password
+- debug:
+    msg: "Jenkins initial admin password: {{ jenkins_admin_password.stdout }}"
